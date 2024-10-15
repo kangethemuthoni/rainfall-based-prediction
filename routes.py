@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.utils import preprocess_text
+from utils import preprocess_text
 
 main = Blueprint('main', __name__)
 
