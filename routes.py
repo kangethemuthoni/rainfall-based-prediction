@@ -3,6 +3,10 @@ from utils import preprocess_text
 
 main = Blueprint('main', __name__)
 
+@main.route('/')
+def index():
+    return "Hello, World!"
+    
 @main.route('/predict', methods=['POST'])
 def predict():
     data = request.json

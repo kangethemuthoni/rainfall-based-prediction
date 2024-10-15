@@ -1,6 +1,12 @@
 import os
+import logging
 from flask import Flask
-from .routes import main
+from routes import main
+from dotenv import load_dotenv
+
+load_dotenv() 
+
+logging.basicConfig(level=logging.DEBUG)
 
 def create_app():
     app = Flask(__name__)
