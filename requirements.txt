@@ -11,4 +11,6 @@ thinc==8.0.12
 setuptools==67.0.0  
 wheel==0.36.2 
 python-dotenv==1.0.1
+blis==0.7.4
+
 
