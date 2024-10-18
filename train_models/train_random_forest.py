@@ -1,67 +1,69 @@
 import pandas as pd
-import pickle
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 from scipy.sparse import hstack, csr_matrix
+import joblib
 
-# Load your data
-new_df = pd.read_csv('/Users/joycendichu/Downloads/new_df.csv')
+def load_and_prepare_data(df):
+    """
+    Function to load, sample, and prepare data for training.
+    """
+    # Sampling the dataset (adjust the frac as needed)
+    df_sampled = df.sample(frac=0.1, random_state=42)
+    
+    # Vectorizing the text features
+    vectorizer = CountVectorizer()
+    X_text = vectorizer.fit_transform(df_sampled['cleaned_review'])
 
-# Take a 10% sample of the data
-df_sampled = new_df.sample(frac=0.1, random_state=42)
+    # Extracting and one-hot encoding other features
+    X_other_features = df_sampled.drop(columns=['cleaned_review', 'adjectives_adverbs', 'pos_tagged_review', 'sentiment'])
+    X_other_features = pd.get_dummies(X_other_features, drop_first=True)
+    X_other_features = csr_matrix(X_other_features.values)
 
-# Initialize the CountVectorizer
-vectorizer = CountVectorizer()
+    # Combining text and other features
+    X = hstack([X_text, X_other_features])
+    y = df_sampled['sentiment']
 
-# Prepare text features
-X_text = vectorizer.fit_transform(df_sampled['cleaned_review'])
+    return X, y, vectorizer
 
-# Prepare other features (excluding certain columns)
-X_other_features = df_sampled.drop(columns=['cleaned_review', 'adjectives_adverbs', 'pos_tagged_review', 'sentiment'])
+def train_model(X_train, y_train):
+    """
+    Function to train the RandomForest model.
+    """
+    clf = RandomForestClassifier(n_estimators=100, max_depth=15, n_jobs=-1, random_state=42)
+    clf.fit(X_train, y_train)
+    return clf
 
-# Convert categorical variables to dummy variables
-X_other_features = pd.get_dummies(X_other_features, drop_first=True)
+def evaluate_model(clf, X_test, y_test):
+    """
+    Function to evaluate the trained model on test data.
+    """
+    y_pred = clf.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f'Accuracy: {accuracy:.4f}')
+    return accuracy
 
-# Convert to sparse matrix
-X_other_features = csr_matrix(X_other_features.values)
+def save_model(clf, vectorizer, model_path='/Users/joycendichu/nlp_flask_app/models/random_forest.pkl', vectorizer_path='/Users/joycendichu/nlp_flask_app/models/random_forest_vectorizer.pkl'):
+    """
+    Function to save the trained model and vectorizer to disk.
+    """
+    joblib.dump(clf, model_path)
+    joblib.dump(vectorizer, vectorizer_path)
+    print(f'Model saved to {model_path}')
+    print(f'Vectorizer saved to {vectorizer_path}')
 
-# Combine text and other features
-X = hstack([X_text, X_other_features])
+def main():
+    df = pd.read_csv('/Users/joycendichu/Downloads/clean_dataset.csv')  # Load your cleaned dataset here
+    X, y, vectorizer = load_and_prepare_data(df)
 
-# Target variable
-y = df_sampled['sentiment']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    clf = train_model(X_train, y_train)
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    evaluate_model(clf, X_test, y_test)
 
-# Initialize the Random Forest Classifier
-rf_model = RandomForestClassifier(n_estimators=100, max_depth=15, n_jobs=-1, random_state=42)
+    save_model(clf, vectorizer, model_path='/Users/joycendichu/nlp_flask_app/models/random_forest.pkl', vectorizer_path='/Users/joycendichu/nlp_flask_app/models/random_forest_vectorizer.pkl')
 
-# Fit the model
-rf_model.fit(X_train, y_train)
-
-# Predict on the test set
-y_pred = rf_model.predict(X_test)
-
-# Evaluate the model
-print("Random Forest Accuracy: ", accuracy_score(y_test, y_pred))
-print(classification_report(y_test, y_pred))
-
-# Save the model
-model_path = '/Users/joycendichu/nlp_flask_app/models/random_forest.pkl'
-with open(model_path, 'wb') as model_file:
-    pickle.dump(rf_model, model_file)
-
-# Save the vectorizer
-vectorizer_path = '/Users/joycendichu/nlp_flask_app/models/random_forest_vectorizer.pkl'
-with open(vectorizer_path, 'wb') as vectorizer_file:
-    pickle.dump(vectorizer, vectorizer_file)
-
-# Save the feature column names for consistency during inference
-feature_columns_path = '/Users/joycendichu/nlp_flask_app/models/feature_columns.pkl'
-with open(feature_columns_path, 'wb') as columns_file:
-    pickle.dump(X_other_features.columns.tolist(), columns_file)
-
-print("Model, vectorizer, and feature columns saved successfully.")
+if __name__ == "__main__":
+    main()

@@ -1,53 +1,65 @@
-# train_svm.py
 import pandas as pd
-import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
+import joblib
 
-# Load the dataset
-new_df = pd.read_csv('/Users/joycendichu/Downloads/new_df.csv')
+def load_and_prepare_data(df):
+    """
+    Function to prepare data for training.
+    """
+    # Vectorizing the text features using TF-IDF
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(df['cleaned_review'])
 
-# Check the DataFrame shape and for missing values
-print("DataFrame shape:", new_df.shape)
-print("Missing values:\n", new_df.isnull().sum())
+    y = df['sentiment'].values.ravel()
 
-# Initialize the TF-IDF Vectorizer
-tfidf_vectorizer = TfidfVectorizer()
-tfidf_matrix = tfidf_vectorizer.fit_transform(new_df['cleaned_review'])
+    # Ensure the shapes match
+    if tfidf_matrix.shape[0] != y.shape[0]:
+        raise ValueError(f"Inconsistent number of samples: TF-IDF has {tfidf_matrix.shape[0]} samples while sentiment has {y.shape[0]} samples.")
 
-# Display the shapes of the TF-IDF matrix and sentiment labels
-print("TF-IDF Matrix shape:", tfidf_matrix.shape)
-print("Sentiment shape:", new_df['sentiment'].shape)
+    return tfidf_matrix, y, tfidf_vectorizer
 
-# Prepare the target variable
-y = new_df['sentiment'].values.ravel()
+def train_svm_model(X_train, y_train):
+    """
+    Function to train the SVM model.
+    """
+    svm_model = LinearSVC()
+    svm_model.fit(X_train, y_train)
+    return svm_model
 
-# Check for consistent number of samples
-if tfidf_matrix.shape[0] != y.shape[0]:
-    raise ValueError("Inconsistent number of samples: TF-IDF has {} samples while sentiment has {} samples.".format(tfidf_matrix.shape[0], y.shape[0]))
+def evaluate_model(svm_model, X_test, y_test):
+    """
+    Function to evaluate the SVM model on test data.
+    """
+    svm_predictions = svm_model.predict(X_test)
+    accuracy = accuracy_score(y_test, svm_predictions)
+    print(f"Linear SVM Accuracy: {accuracy:.4f}")
+    print(classification_report(y_test, svm_predictions))
+    return accuracy
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(tfidf_matrix, y, test_size=0.2, random_state=42)
+def save_model(svm_model, vectorizer, model_path='/Users/joycendichu/nlp_flask_app/models/svm_model.pkl', vectorizer_path='/Users/joycendichu/nlp_flask_app/models/svm_vectorizer.pkl'):
+    """
+    Function to save the trained SVM model and TF-IDF vectorizer to disk.
+    """
+    joblib.dump(svm_model, model_path)
+    joblib.dump(vectorizer, vectorizer_path)
+    print(f'Model saved to {model_path}')
+    print(f'Vectorizer saved to {vectorizer_path}')
 
-# Initialize and train the Linear SVC model
-svm_model = LinearSVC()
-svm_model.fit(X_train, y_train)
+def main():
+    df = pd.read_csv('/Users/joycendichu/Downloads/clean_dataset.csv')  
+    
+    X, y, tfidf_vectorizer = load_and_prepare_data(df)
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Make predictions on the test set
-svm_predictions = svm_model.predict(X_test)
+    svm_model = train_svm_model(X_train, y_train)
 
-# Evaluate the model's performance
-print("Linear SVM Accuracy: ", accuracy_score(y_test, svm_predictions))
-print(classification_report(y_test, svm_predictions))
+    evaluate_model(svm_model, X_test, y_test)
 
-# Save the trained model to a file
-with open('/Users/joycendichu/nlp_flask_app/models/svm.pkl', 'wb') as model_file:
-    pickle.dump(svm_model, model_file)
+    save_model(svm_model, tfidf_vectorizer, model_path='/Users/joycendichu/nlp_flask_app/models/svm_model.pkl', vectorizer_path='/Users/joycendichu/nlp_flask_app/models/svm_vectorizer.pkl')
 
-# Save the TF-IDF vectorizer to a file
-with open('/Users/joycendichu/nlp_flask_app/models/svm_vectorizer.pkl', 'wb') as vectorizer_file:
-    pickle.dump(tfidf_vectorizer, vectorizer_file)
-
-print("Model and vectorizer saved successfully.")
+if __name__ == "__main__":
+    main()
