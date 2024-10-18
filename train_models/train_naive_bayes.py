@@ -5,14 +5,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
 
+
 def load_and_prepare_data(df):
     """
     Function to prepare the data for training using TF-IDF vectorizer.
     """
     tfidf_vectorizer = TfidfVectorizer()
-    X = tfidf_vectorizer.fit_transform(df['cleaned_review'])
-    y = df['sentiment'].values
+    X = tfidf_vectorizer.fit_transform(df["cleaned_review"])
+    y = df["sentiment"].values
     return X, y, tfidf_vectorizer
+
 
 def train_naive_bayes_model(X_train, y_train):
     """
@@ -21,6 +23,7 @@ def train_naive_bayes_model(X_train, y_train):
     nb_model = MultinomialNB()
     nb_model.fit(X_train, y_train)
     return nb_model
+
 
 def evaluate_model(nb_model, X_test, y_test):
     """
@@ -32,27 +35,44 @@ def evaluate_model(nb_model, X_test, y_test):
     print(classification_report(y_test, nb_predictions))
     return accuracy
 
-def save_model(nb_model, vectorizer, model_path='/Users/joycendichu/nlp_flask_app/models/naive_bayes_model.pkl', vectorizer_path='/Users/joycendichu/nlp_flask_app/models/naive_bayes_vectorizer.pkl'):
+
+def save_model(
+    nb_model,
+    vectorizer,
+    model_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_model.pkl",
+    vectorizer_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_vectorizer.pkl",
+):
     """
     Function to save the trained Naive Bayes model and TF-IDF vectorizer to disk.
     """
     joblib.dump(nb_model, model_path)
     joblib.dump(vectorizer, vectorizer_path)
-    print(f'Model saved to {model_path}')
-    print(f'Vectorizer saved to {vectorizer_path}')
+    print(f"Model saved to {model_path}")
+    print(f"Vectorizer saved to {vectorizer_path}")
+
 
 def main():
-    df = pd.read_csv('/Users/joycendichu/Downloads/clean_dataset.csv')  # Replace with your actual data
+    df = pd.read_csv(
+        "/Users/joycendichu/Downloads/clean_dataset.csv"
+    )  # Replace with your actual data
 
     X, y, tfidf_vectorizer = load_and_prepare_data(df)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
     nb_model = train_naive_bayes_model(X_train, y_train)
 
     evaluate_model(nb_model, X_test, y_test)
 
-    save_model(nb_model, tfidf_vectorizer, model_path='/Users/joycendichu/nlp_flask_app/models/naive_bayes_model.pkl', vectorizer_path='/Users/joycendichu/nlp_flask_app/models/naive_bayes_vectorizer.pkl')
+    save_model(
+        nb_model,
+        tfidf_vectorizer,
+        model_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_model.pkl",
+        vectorizer_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_vectorizer.pkl",
+    )
+
 
 if __name__ == "__main__":
     main()
