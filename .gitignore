@@ -13,3 +13,4 @@ myenv1/
 *.jpg
 __pycache__/
 node_modules/
+myenv/
