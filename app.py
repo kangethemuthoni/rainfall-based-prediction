@@ -32,6 +32,10 @@ for model_name, (model_path, vectorizer_path) in model_files.items():
     vectorizers[model_name] = joblib.load(vectorizer_path)
     print(f"{model_name} model and vectorizer loaded.")
 
+@app.route('/')
+def home():
+    return "Welcome to Alkeema NLP Flask App!"
+
 
 @app.route("/predict", methods=["POST"])
 @cross_origin()
