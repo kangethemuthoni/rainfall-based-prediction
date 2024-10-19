@@ -39,8 +39,8 @@ def evaluate_model(log_reg_model, X_test, y_test):
 def save_model(
     log_reg_model,
     vectorizer,
-    model_path="/Users/joycendichu/nlp_flask_app/models/log_reg_model.pkl",
-    vectorizer_path="/Users/joycendichu/nlp_flask_app/models/log_reg_vectorizer.pkl",
+    model_path="models/log_reg_model.pkl",
+    vectorizer_path="models/log_reg_vectorizer.pkl",
 ):
     """
     Function to save the trained Logistic Regression model and TF-IDF vectorizer to disk.
@@ -52,7 +52,7 @@ def save_model(
 
 
 def main():
-    df = pd.read_csv("/Users/joycendichu/Downloads/clean_dataset.csv")
+    df = pd.read_csv("")
     X, y, tfidf_vectorizer = load_and_prepare_data(df)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -65,8 +65,8 @@ def main():
     save_model(
         log_reg_model,
         tfidf_vectorizer,
-        model_path="/Users/joycendichu/nlp_flask_app/models/log_reg_model.pkl",
-        vectorizer_path="/Users/joycendichu/nlp_flask_app/models/log_reg_vectorizer.pkl",
+        model_path="models/log_reg_model.pkl",
+        vectorizer_path="models/log_reg_vectorizer.pkl",
     )
 
 

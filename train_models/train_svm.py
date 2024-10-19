@@ -48,8 +48,8 @@ def evaluate_model(svm_model, X_test, y_test):
 def save_model(
     svm_model,
     vectorizer,
-    model_path="/Users/joycendichu/nlp_flask_app/models/svm_model.pkl",
-    vectorizer_path="/Users/joycendichu/nlp_flask_app/models/linear_svm_vectorizer.pkl",
+    model_path="models/svm_model.pkl",
+    vectorizer_path="models/linear_svm_vectorizer.pkl",
 ):
     """
     Function to save the trained SVM model and TF-IDF vectorizer to disk.
@@ -61,7 +61,7 @@ def save_model(
 
 
 def main():
-    df = pd.read_csv("/Users/joycendichu/Downloads/clean_dataset.csv")
+    df = pd.read_csv("")
 
     X, y, tfidf_vectorizer = load_and_prepare_data(df)
 
@@ -76,8 +76,8 @@ def main():
     save_model(
         svm_model,
         tfidf_vectorizer,
-        model_path="/Users/joycendichu/nlp_flask_app/models/svm_model.pkl",
-        vectorizer_path="/Users/joycendichu/nlp_flask_app/models/linear_svm_vectorizer.pkl",
+        model_path="models/svm_model.pkl",
+        vectorizer_path="models/linear_svm_vectorizer.pkl",
     )
 
 

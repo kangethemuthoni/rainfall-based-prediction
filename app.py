@@ -10,18 +10,19 @@ app.config["CORS_HEADERS"] = "Content-Type"
 
 model_files = {
     "svm": (
-        "/Users/joycendichu/nlp_flask_app/models/svm_model.pkl",
-        "/Users/joycendichu/nlp_flask_app/models/linear_svm_vectorizer.pkl",
+        "models/svm_model.pkl",
+        "models/linear_svm_vectorizer.pkl",
     ),
     "naive_bayes": (
-        "/Users/joycendichu/nlp_flask_app/models/naive_bayes_model.pkl",
-        "/Users/joycendichu/nlp_flask_app/models/naive_bayes_vectorizer.pkl",
+        "models/naive_bayes_model.pkl",
+        "models/naive_bayes_vectorizer.pkl",
     ),
     "logistics_regression": (
-        "/Users/joycendichu/nlp_flask_app/models/log_reg_model.pkl",
-        "/Users/joycendichu/nlp_flask_app/models/log_reg_vectorizer.pkl",
+        "models/log_reg_model.pkl",
+        "models/log_reg_vectorizer.pkl",
     ),
 }
+
 
 models = {}
 vectorizers = {}

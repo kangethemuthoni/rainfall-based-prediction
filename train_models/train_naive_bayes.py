@@ -39,8 +39,8 @@ def evaluate_model(nb_model, X_test, y_test):
 def save_model(
     nb_model,
     vectorizer,
-    model_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_model.pkl",
-    vectorizer_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_vectorizer.pkl",
+    model_path="models/naive_bayes_model.pkl",
+    vectorizer_path="models/naive_bayes_vectorizer.pkl",
 ):
     """
     Function to save the trained Naive Bayes model and TF-IDF vectorizer to disk.
@@ -53,7 +53,7 @@ def save_model(
 
 def main():
     df = pd.read_csv(
-        "/Users/joycendichu/Downloads/clean_dataset.csv"
+        ""
     )  # Replace with your actual data
 
     X, y, tfidf_vectorizer = load_and_prepare_data(df)
@@ -69,8 +69,8 @@ def main():
     save_model(
         nb_model,
         tfidf_vectorizer,
-        model_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_model.pkl",
-        vectorizer_path="/Users/joycendichu/nlp_flask_app/models/naive_bayes_vectorizer.pkl",
+        model_path="models/naive_bayes_model.pkl",
+        vectorizer_path="models/naive_bayes_vectorizer.pkl",
     )
 
 
