@@ -5,7 +5,7 @@ from utils import clean_text_pipeline
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app)  # Allow all origins, adjust as necessary
 app.config["CORS_HEADERS"] = "Content-Type"
 
 model_files = {
@@ -38,7 +38,6 @@ def home():
 
 
 @app.route("/predict", methods=["POST"])
-@cross_origin()
 def predict():
     data = request.get_json()
     review = data["review"]
