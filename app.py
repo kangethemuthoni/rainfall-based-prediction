@@ -88,7 +88,6 @@ def predict():
                 highest_confidence = confidence
                 best_model = model_name
                 best_prediction = prediction[0]
-
         new_review = Review(
             title=title,
             review=review,
@@ -107,7 +106,6 @@ def predict():
                 "title": new_review.title,
             }
         )
-
     if request.method == "GET":
         review_list = Review.query.all()
         results = []
@@ -124,6 +122,7 @@ def predict():
             )
 
         return jsonify(results), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=7070)
