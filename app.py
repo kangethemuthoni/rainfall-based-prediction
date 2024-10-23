@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 app = Flask(__name__)
-cors = CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}) 
 app.config["CORS_HEADERS"] = "Content-Type"
 
 from flask_migrate import Migrate
