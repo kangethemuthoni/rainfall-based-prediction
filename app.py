@@ -2,24 +2,19 @@ import numpy as np
 from flask import Flask, request, jsonify
 import joblib
 from utils import clean_text_pipeline
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}) 
-app.config["CORS_HEADERS"] = "Content-Type"
-
 from flask_migrate import Migrate
 from database import db, init_db
 from models import Review
 
 app = Flask(__name__)
 
+CORS(app, resources={r"/*": {"origins": "*"}})
+app.config["CORS_HEADERS"] = "Content-Type"
+
 init_db(app)
-
 migrate = Migrate(app, db)
-
 
 model_files = {
     "svm": (
@@ -36,7 +31,6 @@ model_files = {
     ),
 }
 
-
 models = {}
 vectorizers = {}
 
@@ -45,11 +39,9 @@ for model_name, (model_path, vectorizer_path) in model_files.items():
     vectorizers[model_name] = joblib.load(vectorizer_path)
     print(f"{model_name} model and vectorizer loaded.")
 
-
 @app.route("/")
 def home():
     return "Welcome to Alkeema NLP Flask App!"
-
 
 @app.route("/predict", methods=["POST", "GET"])
 def predict():
@@ -96,6 +88,7 @@ def predict():
                 highest_confidence = confidence
                 best_model = model_name
                 best_prediction = prediction[0]
+
         new_review = Review(
             title=title,
             review=review,
@@ -114,6 +107,7 @@ def predict():
                 "title": new_review.title,
             }
         )
+
     if request.method == "GET":
         review_list = Review.query.all()
         results = []
@@ -130,7 +124,6 @@ def predict():
             )
 
         return jsonify(results), 200
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=7070)
