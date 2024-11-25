@@ -50,65 +50,67 @@ def home():
 
 @app.route("/predict", methods=["POST","GET"])
 def predict():
-    IF
-    try:
-        # Parse the request data
-        data = request.get_json()
-        biography = data["biography"]
+    if request.method=="POST":
+        try:
+            print("****************")
+            # Parse the request data
+            data = request.get_json()
+            biography = data.get("biography")
 
-        # Preprocess the user input
-        cleaned_input = clean_process_and_extract_features(biography)  # Apply text cleaning
-        cleaned_input_tfidf = tfidf_vectorizers["logistic_regression"].transform([cleaned_input])  # Vectorize input
+            # Preprocess the user input
+            cleaned_input = clean_process_and_extract_features(biography)  # Apply text cleaning
+            print(f"F*******{cleaned_input}********")
+            cleaned_input_tfidf = tfidf_vectorizers["logistic_regression"].transform([cleaned_input])  # Vectorize input
 
-        # Prepare combined features if necessary (e.g., TF-IDF + additional features)
-        # Add any additional feature engineering here if applicable
+            # Prepare combined features if necessary (e.g., TF-IDF + additional features)
+            # Add any additional feature engineering here if applicable
 
-        # Iterate through models and make predictions
-        best_model = None
-        best_prediction = None
-        highest_confidence = -1
-        confidence_scores = {}
+            # Iterate through models and make predictions
+            best_model = None
+            best_prediction = None
+            highest_confidence = -1
+            confidence_scores = {}
 
-        for model_name, model in models.items():
-            print(f"Making prediction with {model_name}...")
-            
-            if model_name in ["cnn", "mlp"]:
-                # Reshape the input for Keras models if necessary
-                reshaped_input = np.array(cleaned_input_tfidf.toarray()).reshape((1, -1))
-                prediction = model.predict(reshaped_input)
-                confidence = np.max(prediction)  # Take the highest probability
-                prediction = np.argmax(prediction)  # Get the class index
-            elif model_name == "svm":
-                # SVM-specific decision function
-                decision_score = model.decision_function(cleaned_input_tfidf)
-                confidence = 1 / (1 + np.exp(-decision_score[0]))  # Sigmoid for confidence
-                prediction = model.predict(cleaned_input_tfidf)
-            elif hasattr(model, "predict_proba"):
-                # Models with `predict_proba` (e.g., Logistic Regression, Random Forest, etc.)
-                prediction_probabilities = model.predict_proba(cleaned_input_tfidf)
-                confidence = max(prediction_probabilities[0])  # Get the highest probability
-                prediction = model.predict(cleaned_input_tfidf)
-            else:
-                # Models without probability output
-                prediction = model.predict(cleaned_input_tfidf)
-                confidence = 1  # Default confidence for non-probabilistic models
+            for model_name, model in models.items():
+                print(f"Making prediction with {model_name}...")
+                
+                if model_name in ["cnn", "mlp"]:
+                    # Reshape the input for Keras models if necessary
+                    reshaped_input = np.array(cleaned_input_tfidf.toarray()).reshape((1, -1))
+                    prediction = model.predict(reshaped_input)
+                    confidence = np.max(prediction)  # Take the highest probability
+                    prediction = np.argmax(prediction)  # Get the class index
+                elif model_name == "svm":
+                    # SVM-specific decision function
+                    decision_score = model.decision_function(cleaned_input_tfidf)
+                    confidence = 1 / (1 + np.exp(-decision_score[0]))  # Sigmoid for confidence
+                    prediction = model.predict(cleaned_input_tfidf)
+                elif hasattr(model, "predict_proba"):
+                    # Models with `predict_proba` (e.g., Logistic Regression, Random Forest, etc.)
+                    prediction_probabilities = model.predict_proba(cleaned_input_tfidf)
+                    confidence = max(prediction_probabilities[0])  # Get the highest probability
+                    prediction = model.predict(cleaned_input_tfidf)
+                else:
+                    # Models without probability output
+                    prediction = model.predict(cleaned_input_tfidf)
+                    confidence = 1  # Default confidence for non-probabilistic models
 
-            # Store the confidence score
-            confidence_scores[model_name] = confidence
-            if confidence > highest_confidence:
-                highest_confidence = confidence
-                best_prediction = prediction[0] if isinstance(prediction, np.ndarray) else prediction
+                # Store the confidence score
+                confidence_scores[model_name] = confidence
+                if confidence > highest_confidence:
+                    highest_confidence = confidence
+                    best_prediction = prediction[0] if isinstance(prediction, np.ndarray) else prediction
 
-        # Return the best prediction
-        return jsonify({
-            "input": biography,
-            "prediction": int(best_prediction),  # Ensure it's JSON serializable
-            "confidence": float(highest_confidence),
-            "confidence_scores": confidence_scores
-        })
+            # Return the best prediction
+            return jsonify({
+                "input": biography,
+                "prediction": int(best_prediction),  # Ensure it's JSON serializable
+                "confidence": float(highest_confidence),
+                "confidence_scores": confidence_scores
+            })
 
-    except Exception as e:
-        return jsonify({"error": str(e)})
+        except Exception as e:
+            return jsonify({"error": str(e)})
 
 if __name__ == "__main__":
     app.run(debug=True, port=7070)

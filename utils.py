@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pickle
 from langdetect import detect
 tfidf_vectorizer = TfidfVectorizer()
+from nltk.corpus import stopwords
 
 from bs4 import BeautifulSoup
 
@@ -149,7 +150,6 @@ def clean_text(text):
     return text
 
 def remove_stop_words(text):
-    from nltk.corpus import stopwords
     stop_words = set(stopwords.words('english'))
     additional_stop_words = ["um", "uh", "like", "actually", "basically", "you know"]
     stop_words.update(additional_stop_words)
@@ -174,36 +174,52 @@ def filter_english_text(text):
     except:
         return ''
 
-# Full Pipeline for Cleaning, Processing, and Feature Extraction
 def clean_process_and_extract_features(text):
     # Step 1: Clean the text
     text = clean_text(text)
+    print(f"Text after cleaning: {text}")
     text = remove_stop_words(text)
+    print(f"Text after stop word removal: {text}")
     text = remove_filler_words(text)
-    
+    print(f"Text after filler word removal: {text}")
+
     # Step 2: Tokenize and POS tagging
     tokens = tokenize_text(text)
+    print(f"Tokenized text: {tokens}")
     pos_tags = pos_tagging(tokens)
-    
+    print(f"POS-tagged tokens: {pos_tags}")
+
     # Step 3: Extract relevant words
     relevant_words = extract_relevant_words(pos_tags)
-    
-    # Step 4: Filter non-English text
-    relevant_words = filter_english_text(relevant_words)
-    
-    # Step 5: TF-IDF features
-    tfidf_features = tfidf_vectorizer.transform([relevant_words]).toarray()
-    
+    print(f"Relevant words (POS-filtered): {relevant_words}")
+
+    # Step 4: Preprocess relevant words
+    relevant_words = ' '.join(re.findall(r'\b\w+\b', relevant_words))
+    print(f"Relevant words (cleaned): {relevant_words}")
+
+    # Step 5: Handle empty input
+    if not relevant_words.strip():
+        tfidf_features = np.zeros((1, len(tfidf_vectorizer.get_feature_names_out())))
+    else:
+        tfidf_features = tfidf_vectorizer.transform([relevant_words]).toarray()
+
+    print(f"TF-IDF Features Shape: {tfidf_features.shape}")
+    print(f"TF-IDF Features: {tfidf_features}")
+
     # Step 6: MO features
     mo_features = np.array([int(keyword in relevant_words) for keyword in mo_keywords]).reshape(1, -1)
-    
+    print(f"MO Features: {mo_features}")
+
     # Step 7: Behavioral features
     behavior_features = np.array([int(keyword in relevant_words) for keyword in behavior_keywords]).reshape(1, -1)
-    
+    print(f"Behavioral Features: {behavior_features}")
+
     # Step 8: Psychological features
     psychological_features = np.array([int(keyword in relevant_words) for keyword in psychological_keywords]).reshape(1, -1)
-    
+    print(f"Psychological Features: {psychological_features}")
+
     # Step 9: Combine all features
     combined_features = np.hstack([tfidf_features, mo_features, behavior_features, psychological_features])
+    print(f"Combined Features: {combined_features}")
 
     return combined_features
